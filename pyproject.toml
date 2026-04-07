@@ -5,46 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "prompt-stealing-attack"
 version = "0.1.0"
-description = "Prompt Stealing Attacks Against Text-to-Image Generation Models"
-readme = "README.md"
-authors = [
-    {name = "Clodoaldo Brasilino", email = "clodbrasilino@zju.edu.cn"},
-]
-license = {text = "BSD-3-Clause"}
-
-[project.urls]
-Homepage = "https://github.com/clodbrasilino/prompt-stealing-attack"
 requires-python = ">=3.8"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3",
-]
-dependencies = [
-    "torch",
-    "torchvision",
-    "timm>=0.4.12",
-    "transformers>=4.15.0",
-    "fairscale>=0.4.4",
-    "ruamel.yaml>=0.17.32",
-    "pycocoevalcap",
-    "ftfy",
-    "regex",
-    "tqdm",
-    "opencv-python-headless",
-    "scikit-learn",
-    "imagehash",
-]
-
-[project.optional-dependencies]
-dev = ["pytest", "black", "flake8"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-
-# Explicit packages (avoids scanning on egg_info which can fail with missing deps)
 packages = [
     "models",
     "models.BLIP_finetune",
