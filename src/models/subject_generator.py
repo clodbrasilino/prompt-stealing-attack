@@ -13,7 +13,11 @@ import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.functional import InterpolationMode
 from ruamel.yaml import YAML
-from src.BLIP_finetune.models.blip import blip_decoder
+# Absolute import: with package_dir={"": "src"}, pip install puts
+# src/BLIP_finetune/ → BLIP_finetune/ (top-level in site-packages).
+# With sys.path.insert(0, 'src') the src/ dir IS on sys.path, so
+# BLIP_finetune is also found as a top-level package → works in both modes.
+from BLIP_finetune.models.blip import blip_decoder
 
 # Try to find the default config via importlib.resources (pip-installed).
 # Fall back to a relative path (cloned repo + sys.path.insert).
@@ -24,7 +28,7 @@ try:
 
     def _get_default_config_path() -> str:
         """Return path to lexica_subject.yaml inside the installed package."""
-        ref = _resources.files("BLIP_finetune") / "configs" / _CONFIG_FILE
+        ref = _resources.files("models.BLIP_finetune") / "configs" / _CONFIG_FILE
         if ref.is_file():
             return str(ref)
         # Try older API

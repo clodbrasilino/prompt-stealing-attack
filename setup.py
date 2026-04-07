@@ -11,10 +11,11 @@ setup(
     author="Clodoaldo Brasilino",
     author_email="clodbrasilino@zju.edu.cn",
     url="https://github.com/clodbrasilino/prompt-stealing-attack",
-    packages=find_packages(where="src"),
+    packages=["models", "models.BLIP_finetune", "models.BLIP_finetune.models",
+              "models.ml_decoder", "models.ml_decoder.huggingface"],
     package_dir={"": "src"},
     package_data={
-        "BLIP_finetune": ["configs/*.yaml"],
+        "models.BLIP_finetune": ["configs/*.yaml"],
     },
     python_requires=">=3.8",
     install_requires=[

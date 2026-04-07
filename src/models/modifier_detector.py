@@ -4,7 +4,7 @@ Adapted from ML-Decoder (https://github.com/Alibaba-MIIL/ML_Decoder)
 """
 import torch
 import torchvision.transforms as transforms
-from src.ml_decoder.models import create_model
+from ml_decoder.models import create_model
 import argparse
 
 
