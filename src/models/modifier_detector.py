@@ -111,7 +111,7 @@ class ModifierDetector:
         # Detect modifiers
         sigmoid = torch.nn.Sigmoid()
         with torch.no_grad():
-            outputs = sigmoid(self.modifier_detector(images_tensor)).cpu()
+            outputs = sigmoid(self.model(images_tensor)).cpu()
             
         # Process predictions
         pred_batch = []
