@@ -10,8 +10,10 @@ readme = "README.md"
 authors = [
     {name = "Clodoaldo Brasilino", email = "clodbrasilino@zju.edu.cn"},
 ]
-url = "https://github.com/clodbrasilino/prompt-stealing-attack"
 license = {text = "BSD-3-Clause"}
+
+[project.urls]
+Homepage = "https://github.com/clodbrasilino/prompt-stealing-attack"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 3 - Alpha",
