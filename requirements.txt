@@ -19,11 +19,11 @@ git+https://github.com/openai/CLIP.git
 
 # For finetune BLIP
 timm==0.4.12
-transformers==4.15.0
-fairscale==0.4.4
+transformers>=4.15.0,<5.0  # or >=5.0 with med.py patch (see src/BLIP_finetune/models/med.py)
+fairscale>=0.4.4
 pycocoevalcap
-opencv-python-headless<4.3
-opencv-contrib-python-headless<4.3
-ruamel.yaml==0.17.32
+opencv-python-headless
+opencv-contrib-python-headless
+ruamel.yaml>=0.17.32  # API fixed in src/models/subject_generator.py
 datasets
 pillow==10.4.0

@@ -5,7 +5,7 @@ Adapted from BLIP (https://github.com/salesforce/BLIP)
 import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.functional import InterpolationMode
-import ruamel.yaml as yaml
+from ruamel.yaml import YAML
 from src.BLIP_finetune.models.blip import blip_decoder
 
 
@@ -37,8 +37,9 @@ class SubjectGenerator:
         """
         print(f"Loading subject generator from {checkpoint_path}...")
         
-        # Load configuration
-        config = yaml.load(open(self.config_path, 'r'), Loader=yaml.Loader)
+        # Load configuration (using ruamel.yaml API for version >= 0.18)
+        yaml_obj = YAML(typ='rt')
+        config = yaml_obj.load(open(self.config_path, 'r'))
         
         # Create model
         self.model = blip_decoder(
