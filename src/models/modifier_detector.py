@@ -70,6 +70,7 @@ class ModifierDetector:
         parser.add_argument('--num-of-groups', default=-1, type=int)  # full-decoding
         parser.add_argument('--decoder-embedding', default=768, type=int)
         parser.add_argument('--zsl', default=0, type=int)
+        parser.add_argument('--load-pretrain', default=0, type=int)
         args, _ = parser.parse_known_args()
         return args
         
