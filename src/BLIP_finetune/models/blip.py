@@ -146,15 +146,16 @@ class BLIP_Decoder(nn.Module):
     def generate(self, image, sample=False, num_beams=3, max_length=30, min_length=10, top_p=0.9, repetition_penalty=1.0):
         image_embeds = self.visual_encoder(image)
 
-        if not sample:
-            image_embeds = image_embeds.repeat_interleave(num_beams,dim=0)
+        # NOTE: do NOT expand image_embeds here — GenerationMixin.generate()
+        # with num_beams>1 internally expands encoder_hidden_states and
+        # encoder_attention_mask on its own. Expanding here causes double-
+        # expansion (B*num_beams*num_beams) and shape mismatches.
             
         image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
         
         # transformers 5.x GenerationMixin expects encoder_attention_mask in
         # 4D [B, 1, 1, S] so it can be _expand()'d correctly for beam search.
         image_atts_4d = image_atts.unsqueeze(1).unsqueeze(2)   # [B, 1, 1, S]
-        image_atts_4d = image_atts_4d.repeat_interleave(num_beams, dim=0) if not sample else image_atts_4d
         model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask": image_atts_4d}
         
         prompt = [self.prompt] * image.size(0)
