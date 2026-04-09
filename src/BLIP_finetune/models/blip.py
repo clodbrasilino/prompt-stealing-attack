@@ -24,14 +24,9 @@ from timm.models.hub import download_cached_file
 
 def _default_med_config():
     """Resolve med_config.json to the installed BLIP_finetune package location."""
-    try:
-        import importlib.resources as _r
-        ref = _r.files("BLIP_finetune") / "configs" / "med_config.json"
-        with _r.as_file(ref) as p:
-            return str(p)
-    except Exception:
-        # Fallback: try relative to this file (cloned repo / dev mode)
-        return os.path.join(os.path.dirname(__file__), "..", "configs", "med_config.json")
+    # __file__ = .../site-packages/BLIP_finetune/models/blip.py
+    # configs/ is a sibling of models/
+    return os.path.join(os.path.dirname(__file__), "..", "configs", "med_config.json")
 
 class BLIP_Base(nn.Module):
     def __init__(self,                 
