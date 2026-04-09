@@ -7,6 +7,7 @@
 '''
 import warnings
 warnings.filterwarnings("ignore")
+import traceback
 
 from BLIP_finetune.models.vit import VisionTransformer, interpolate_pos_embed
 from BLIP_finetune.models.med import BertConfig, BertModel, BertLMHeadModel
@@ -144,53 +145,57 @@ class BLIP_Decoder(nn.Module):
         return loss_lm
         
     def generate(self, image, sample=False, num_beams=3, max_length=30, min_length=10, top_p=0.9, repetition_penalty=1.0):
-        image_embeds = self.visual_encoder(image)
+        try:
+            image_embeds = self.visual_encoder(image)
 
-        # NOTE: do NOT expand image_embeds here — GenerationMixin.generate()
-        # with num_beams>1 internally expands encoder_hidden_states and
-        # encoder_attention_mask on its own. Expanding here causes double-
-        # expansion (B*num_beams*num_beams) and shape mismatches.
+            # NOTE: do NOT expand image_embeds here — GenerationMixin.generate()
+            # with num_beams>1 internally expands encoder_hidden_states and
+            # encoder_attention_mask on its own. Expanding here causes double-
+            # expansion (B*num_beams*num_beams) and shape mismatches.
+                
+            image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
             
-        image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
-        
-        # transformers 5.x GenerationMixin expects encoder_attention_mask in
-        # 4D [B, 1, 1, S] so it can be _expand()'d correctly for beam search.
-        image_atts_4d = image_atts.unsqueeze(1).unsqueeze(2)   # [B, 1, 1, S]
-        model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask": image_atts_4d}
-        
-        prompt = [self.prompt] * image.size(0)
-        input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(image.device) 
-        input_ids[:,0] = self.tokenizer.bos_token_id
-        input_ids = input_ids[:, :-1] 
+            # transformers 5.x GenerationMixin expects encoder_attention_mask in
+            # 4D [B, 1, 1, S] so it can be _expand()'d correctly for beam search.
+            image_atts_4d = image_atts.unsqueeze(1).unsqueeze(2)   # [B, 1, 1, S]
+            model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask": image_atts_4d}
+            
+            prompt = [self.prompt] * image.size(0)
+            input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(image.device) 
+            input_ids[:,0] = self.tokenizer.bos_token_id
+            input_ids = input_ids[:, :-1] 
 
-        if sample:
-            #nucleus sampling
-            outputs = self.text_decoder.generate(input_ids=input_ids,
-                                                  max_length=max_length,
-                                                  min_length=min_length,
-                                                  do_sample=True,
-                                                  top_p=top_p,
-                                                  num_return_sequences=1,
-                                                  eos_token_id=self.tokenizer.sep_token_id,
-                                                  pad_token_id=self.tokenizer.pad_token_id, 
-                                                  repetition_penalty=1.1,                                            
-                                                  **model_kwargs)
-        else:
-            #beam search
-            outputs = self.text_decoder.generate(input_ids=input_ids,
-                                                  max_length=max_length,
-                                                  min_length=min_length,
-                                                  num_beams=num_beams,
-                                                  eos_token_id=self.tokenizer.sep_token_id,
-                                                  pad_token_id=self.tokenizer.pad_token_id,     
-                                                  repetition_penalty=repetition_penalty,
-                                                  **model_kwargs)            
-            
-        captions = []    
-        for output in outputs:
-            caption = self.tokenizer.decode(output, skip_special_tokens=True)    
-            captions.append(caption[len(self.prompt):])
-        return captions
+            if sample:
+                #nucleus sampling
+                outputs = self.text_decoder.generate(input_ids=input_ids,
+                                                      max_length=max_length,
+                                                      min_length=min_length,
+                                                      do_sample=True,
+                                                      top_p=top_p,
+                                                      num_return_sequences=1,
+                                                      eos_token_id=self.tokenizer.sep_token_id,
+                                                      pad_token_id=self.tokenizer.pad_token_id, 
+                                                      repetition_penalty=1.1,                                            
+                                                      **model_kwargs)
+            else:
+                #beam search
+                outputs = self.text_decoder.generate(input_ids=input_ids,
+                                                      max_length=max_length,
+                                                      min_length=min_length,
+                                                      num_beams=num_beams,
+                                                      eos_token_id=self.tokenizer.sep_token_id,
+                                                      pad_token_id=self.tokenizer.pad_token_id,     
+                                                      repetition_penalty=repetition_penalty,
+                                                      **model_kwargs)            
+                
+            captions = []    
+            for output in outputs:
+                caption = self.tokenizer.decode(output, skip_special_tokens=True)    
+                captions.append(caption[len(self.prompt):])
+            return captions
+        except Exception:
+            traceback.print_exc()
+            raise
     
 
 def blip_decoder(pretrained='',**kwargs):
