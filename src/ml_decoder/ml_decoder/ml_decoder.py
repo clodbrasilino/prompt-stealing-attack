@@ -62,11 +62,7 @@ class TransformerDecoderLayerOptimal(nn.Module):
 
         # Remap old checkpoint keys "multihead_attn.*" → "self_attn.*"
         self._register_load_state_dict_pre_hook(
-            lambda state_dict, prefix, local_state_dict, missing, unexpected: [
-                _remap_key(state_dict, prefix + "multihead_attn.", prefix + "self_attn.")
-                for k in list(state_dict.keys())
-                if k.startswith(prefix + "multihead_attn.")
-            ]
+            lambda sd, prefix, *_: _remap_key(sd, prefix + "multihead_attn.", prefix + "self_attn.")
         )
 
     def __setstate__(self, state):
