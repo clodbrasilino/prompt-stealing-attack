@@ -40,19 +40,51 @@ from transformers.modeling_outputs import (
 # the rest moved to pytorch_utils
 from transformers.modeling_utils import PreTrainedModel
 
-try:
-    from transformers.pytorch_utils import (
-        apply_chunking_to_forward,
-        find_pruneable_heads_and_indices,
-        prune_linear_layer,
+# transformers 5.x removed these from public API — define locally
+def apply_chunking_to_forward(forward_fn, chunk_param, num_chunks, chunk_size):
+    """Helper to chunk a forward pass into smaller pieces."""
+    return torch.cat(
+        [forward_fn(*input) for input in zip(*chunk_param)],
+        dim=-1,
     )
-except ImportError:
-    # fallback: transformers<4.50
-    from transformers.modeling_utils import (
-        apply_chunking_to_forward,
-        find_pruneable_heads_and_indices,
-        prune_linear_layer,
-    )
+
+
+def find_pruneable_heads_and_indices(heads, prune_heads, head_size, already_pruned_heads):
+    """Find heads that can be pruned and return their indices."""
+    mask = torch.ones(len(heads), head_size)
+    indices = []
+    if not prune_heads:
+        return heads, indices
+    for head in prune_heads:
+        head = head - sum(1 if h < head else 0 for h in already_pruned_heads)
+    idx = 0
+    for head in range(len(heads)):
+        if head not in prune_heads:
+            idx += 1
+            continue
+        mask[head, :head_size] = 0
+    mask = mask.view(-1).contiguous().eq(1)
+    indices = mask.nonzero(as_tuple=False).squeeze(-1).tolist()
+    heads = [i for i in range(len(heads)) if i not in prune_heads]
+    return heads, indices
+
+
+def prune_linear_layer(layer, index, dim=0):
+    """Prune a linear layer to keep only entries in index."""
+    index = index.to(layer.weight.device)
+    W = layer.weight.index_select(dim, index).clone()
+    b = layer.bias if layer.bias is not None else None
+    if b is not None:
+        if dim == 0:
+            b = b[index].clone()
+        else:
+            b = b.clone()
+    new_layer = torch.nn.Linear(W.shape[1], W.shape[0] if dim == 0 else W.shape[0])
+    new_layer.weight.data = W
+    if b is not None:
+        new_layer.bias.data = b
+    new_layer = new_layer.to(layer.weight.device)
+    return new_layer
 from transformers.utils import logging
 from transformers.models.bert.configuration_bert import BertConfig
 
