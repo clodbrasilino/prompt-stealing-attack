@@ -632,7 +632,10 @@ class BertModel(BertPreTrainedModel):
         self.pooler = BertPooler(config) if add_pooling_layer else None
 
         self.init_weights()
- 
+
+    def tie_weights(self, recompute_mapping=None, missing_keys=None):
+        # transformers 5.x removed all_tied_weights_keys; BERT encoder has no weight tying
+        pass
 
     def get_input_embeddings(self):
         return self.embeddings.word_embeddings
