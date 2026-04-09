@@ -7,20 +7,8 @@ name = "prompt-stealing-attack"
 version = "0.1.0"
 requires-python = ">=3.8"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = [
-    "models",
-    "models.BLIP_finetune",
-    "models.BLIP_finetune.models",
-    "models.BLIP_finetune.data",
-    "models.BLIP_finetune.transform",
-    "models.ml_decoder",
-    "models.ml_decoder.models",
-    "models.ml_decoder.models.tresnet",
-    "models.ml_decoder.models.tresnet.layers",
-    "models.ml_decoder.huggingface",
-]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
-"models.BLIP_finetune" = ["configs/*.yaml"]
+"BLIP_finetune" = ["configs/*.yaml", "configs/*.json"]
