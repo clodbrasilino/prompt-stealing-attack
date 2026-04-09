@@ -119,14 +119,14 @@ class ModifierDetector:
         for row_idx in range(len(outputs)):
             one_output = outputs[row_idx].numpy()
             
-            # Create dictionary with predictions
             if self.category_map is not None:
+                # Return a list of modifier *names* (strings) above threshold.
+                # This is what downstream code expects for ', '.join(modifiers).
                 d = dict(zip(self.category_map.keys(), one_output))
-                # Filter by threshold
-                pred_keywords = {k: v for k, v in d.items() if v > self.threshold}
+                pred_keywords = [str(k) for k, v in d.items() if v > self.threshold]
             else:
-                # Return raw predictions if no category map
-                pred_keywords = one_output
+                # Return empty list if no category map — avoids "numpy array in join" errors
+                pred_keywords = []
                 
             pred_batch.append(pred_keywords)
             
