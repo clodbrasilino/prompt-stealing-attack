@@ -12,6 +12,12 @@ from BLIP_finetune.models.vit import VisionTransformer, interpolate_pos_embed
 from BLIP_finetune.models.med import BertConfig, BertModel, BertLMHeadModel
 from transformers import BertTokenizer
 
+# transformers 5.x removed all_tied_weights_keys from PreTrainedModel.
+# Patch it on the class so init_weights()->tie_weights() doesn't crash.
+def _noop_tie_weights(self, recompute_mapping=None, missing_keys=None):
+    pass
+BertLMHeadModel.tie_weights = _noop_tie_weights
+
 import torch
 from torch import nn
 import torch.nn.functional as F
