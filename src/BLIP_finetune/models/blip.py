@@ -150,7 +150,12 @@ class BLIP_Decoder(nn.Module):
             image_embeds = image_embeds.repeat_interleave(num_beams,dim=0)
             
         image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
-        model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask":image_atts}
+        
+        # transformers 5.x GenerationMixin expects encoder_attention_mask in
+        # 4D [B, 1, 1, S] so it can be _expand()'d correctly for beam search.
+        image_atts_4d = image_atts.unsqueeze(1).unsqueeze(2)   # [B, 1, 1, S]
+        image_atts_4d = image_atts_4d.repeat_interleave(num_beams, dim=0) if not sample else image_atts_4d
+        model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask": image_atts_4d}
         
         prompt = [self.prompt] * image.size(0)
         input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(image.device) 
