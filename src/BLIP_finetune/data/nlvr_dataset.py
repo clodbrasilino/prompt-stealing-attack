@@ -7,7 +7,7 @@ from torchvision.datasets.utils import download_url
 
 from PIL import Image
 
-from src.BLIP_finetune.data.utils import pre_caption
+from .utils import pre_caption
 
 class nlvr_dataset(Dataset):
     def __init__(self, transform, image_root, ann_root, split):  

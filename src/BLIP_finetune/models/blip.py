@@ -8,8 +8,8 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from src.BLIP_finetune.models.vit import VisionTransformer, interpolate_pos_embed
-from src.BLIP_finetune.models.med import BertConfig, BertModel, BertLMHeadModel
+from BLIP_finetune.models.vit import VisionTransformer, interpolate_pos_embed
+from BLIP_finetune.models.med import BertConfig, BertModel, BertLMHeadModel
 from transformers import BertTokenizer
 
 import torch

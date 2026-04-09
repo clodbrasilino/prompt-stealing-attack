@@ -3,14 +3,14 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
-from src.BLIP_finetune.data.coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
-from src.BLIP_finetune.data.nocaps_dataset import nocaps_eval
-from src.BLIP_finetune.data.flickr30k_dataset import flickr30k_train, flickr30k_retrieval_eval
-from src.BLIP_finetune.data.vqa_dataset import vqa_dataset
-from src.BLIP_finetune.data.nlvr_dataset import nlvr_dataset
-from src.BLIP_finetune.data.pretrain_dataset import pretrain_dataset
-from src.BLIP_finetune.data.lexica_dataset import LexicaDataset
-from src.BLIP_finetune.transform.randaugment import RandomAugment
+from .coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
+from .nocaps_dataset import nocaps_eval
+from .flickr30k_dataset import flickr30k_train, flickr30k_retrieval_eval
+from .vqa_dataset import vqa_dataset
+from .nlvr_dataset import nlvr_dataset
+from .pretrain_dataset import pretrain_dataset
+from .lexica_dataset import LexicaDataset
+from BLIP_finetune.transform.randaugment import RandomAugment
 
 def create_dataset(dataset, config, min_scale=0.5):
     
