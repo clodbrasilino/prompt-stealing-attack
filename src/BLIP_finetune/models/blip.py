@@ -17,12 +17,25 @@ from torch import nn
 import torch.nn.functional as F
 
 import os
+import pathlib
 from urllib.parse import urlparse
 from timm.models.hub import download_cached_file
 
+
+def _default_med_config():
+    """Resolve med_config.json to the installed BLIP_finetune package location."""
+    try:
+        import importlib.resources as _r
+        ref = _r.files("BLIP_finetune") / "configs" / "med_config.json"
+        with _r.as_file(ref) as p:
+            return str(p)
+    except Exception:
+        # Fallback: try relative to this file (cloned repo / dev mode)
+        return os.path.join(os.path.dirname(__file__), "..", "configs", "med_config.json")
+
 class BLIP_Base(nn.Module):
     def __init__(self,                 
-                 med_config = 'configs/med_config.json',  
+                 med_config = None,
                  image_size = 224,
                  vit = 'base',
                  vit_grad_ckpt = False,
@@ -33,11 +46,13 @@ class BLIP_Base(nn.Module):
             med_config (str): path for the mixture of encoder-decoder model's configuration file
             image_size (int): input image size
             vit (str): model size of vision transformer
-        """               
+        """
+        if med_config is None:
+            med_config = _default_med_config()
         super().__init__()
-        
+
         self.visual_encoder, vision_width = create_vit(vit,image_size, vit_grad_ckpt, vit_ckpt_layer)
-        self.tokenizer = init_tokenizer()   
+        self.tokenizer = init_tokenizer()
         med_config = BertConfig.from_json_file(med_config)
         med_config.encoder_width = vision_width
         self.text_encoder = BertModel(config=med_config, add_pooling_layer=False)  
@@ -77,7 +92,7 @@ class BLIP_Base(nn.Module):
         
 class BLIP_Decoder(nn.Module):
     def __init__(self,                 
-                 med_config = 'configs/med_config.json',  
+                 med_config = None,
                  image_size = 384,
                  vit = 'base',
                  vit_grad_ckpt = False,
@@ -89,15 +104,17 @@ class BLIP_Decoder(nn.Module):
             med_config (str): path for the mixture of encoder-decoder model's configuration file
             image_size (int): input image size
             vit (str): model size of vision transformer
-        """            
+        """
+        if med_config is None:
+            med_config = _default_med_config()
         super().__init__()
-        
+
         self.visual_encoder, vision_width = create_vit(vit,image_size, vit_grad_ckpt, vit_ckpt_layer)
-        self.tokenizer = init_tokenizer()   
+        self.tokenizer = init_tokenizer()
         med_config = BertConfig.from_json_file(med_config)
         med_config.encoder_width = vision_width
-        self.text_decoder = BertLMHeadModel(config=med_config)    
-        
+        self.text_decoder = BertLMHeadModel(config=med_config)
+
         self.prompt = prompt
         self.prompt_length = len(self.tokenizer(self.prompt).input_ids)-1
 
