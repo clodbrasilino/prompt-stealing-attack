@@ -40,6 +40,12 @@ from transformers.modeling_outputs import (
 # the rest moved to pytorch_utils
 from transformers.modeling_utils import PreTrainedModel
 
+# transformers 5.x: generate() moved out of PreTrainedModel into GenerationMixin
+try:
+    from transformers.generation.utils import GenerationMixin
+except ImportError:
+    from transformers.generation_mixin import GenerationMixin
+
 # transformers 5.x removed these from public API — define locally
 def apply_chunking_to_forward(forward_fn, chunk_param, num_chunks, chunk_size):
     """Helper to chunk a forward pass into smaller pieces."""
@@ -854,7 +860,7 @@ class BertModel(BertPreTrainedModel):
 
 
 
-class BertLMHeadModel(BertPreTrainedModel):
+class BertLMHeadModel(BertPreTrainedModel, GenerationMixin):
 
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
     _keys_to_ignore_on_load_missing = [r"position_ids", r"predictions.decoder.bias"]
