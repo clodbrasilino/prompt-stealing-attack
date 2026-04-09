@@ -604,6 +604,19 @@ class BertPreTrainedModel(PreTrainedModel):
     base_model_prefix = "bert"
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
+    def invert_attention_mask(self, encoder_attention_mask: Tensor) -> Tensor:
+        """
+        Invert an attention mask (0 → -inf, 1 → 0).
+        Handles 2D, 3D, and 4D inputs — the parent's version only handles 2D/3D.
+        """
+        if encoder_attention_mask.dim() == 2:
+            encoder_attention_mask = encoder_attention_mask[:, None, None, :]
+        elif encoder_attention_mask.dim() == 3:
+            encoder_attention_mask = encoder_attention_mask[:, None, :, :]
+        # 4D: already in [B, 1, 1, S] or [B, 1, H, S] — pass through
+        encoder_attention_mask = encoder_attention_mask.to(dtype=self.dtype)
+        return (1.0 - encoder_attention_mask) * torch.finfo(self.dtype).min
+
     def _init_weights(self, module):
         """ Initialize the weights """
         if isinstance(module, (nn.Linear, nn.Embedding)):
