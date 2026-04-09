@@ -5,6 +5,14 @@ from torch import nn, Tensor
 from torch.nn.modules.transformer import _get_activation_fn
 
 
+def _remap_key(state_dict, old_prefix, new_prefix):
+    """Rename keys in state_dict from old_prefix* → new_prefix*."""
+    for k in list(state_dict.keys()):
+        if k.startswith(old_prefix):
+            new_k = new_prefix + k[len(old_prefix):]
+            state_dict[new_k] = state_dict.pop(k)
+
+
 def add_ml_decoder_head(model, num_classes=-1, num_of_groups=-1, decoder_embedding=768, zsl=0):
     if num_classes == -1:
         num_classes = model.num_classes
@@ -38,7 +46,10 @@ class TransformerDecoderLayerOptimal(nn.Module):
         self.dropout3 = nn.Dropout(dropout)
 
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.multihead_attn = self.self_attn  # alias for internal use
+        # NOTE: attribute named self.self_attn (not multihead_attn) so that
+        # nn.TransformerDecoder.forward() can access self.layers[0].self_attn.batch_first
+        # for causal mask detection.  A load_state_dict_pre_hook remaps old checkpoints
+        # that were saved with the attribute named "multihead_attn".
 
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -48,6 +59,15 @@ class TransformerDecoderLayerOptimal(nn.Module):
         self.norm3 = nn.LayerNorm(d_model, eps=layer_norm_eps)
 
         self.activation = _get_activation_fn(activation)
+
+        # Remap old checkpoint keys "multihead_attn.*" → "self_attn.*"
+        self._register_load_state_dict_pre_hook(
+            lambda state_dict, prefix, local_state_dict, missing, unexpected: [
+                _remap_key(state_dict, prefix + "multihead_attn.", prefix + "self_attn.")
+                for k in list(state_dict.keys())
+                if k.startswith(prefix + "multihead_attn.")
+            ]
+        )
 
     def __setstate__(self, state):
         if 'activation' not in state:
@@ -60,7 +80,7 @@ class TransformerDecoderLayerOptimal(nn.Module):
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         tgt = tgt + self.dropout1(tgt)
         tgt = self.norm1(tgt)
-        tgt2 = self.multihead_attn(tgt, memory, memory)[0]
+        tgt2 = self.self_attn(tgt, memory, memory)[0]
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt)
         tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
