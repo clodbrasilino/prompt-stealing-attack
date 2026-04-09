@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "prompt-stealing-attack"
 version = "0.1.0"
 requires-python = ">=3.8"
-dependencies = ["ruamel.yaml", "fairscale"]
+dependencies = ["ruamel.yaml", "fairscale", "inplace-abn"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
