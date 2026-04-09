@@ -2,7 +2,6 @@ image_root: 'vera365/lexica_dataset'
 
 # set pretrained as a file path or an url
 pretrained: 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_caption.pth'
-med_config: 'src/BLIP_finetune/configs/med_config.json'
 
 # size of vit model; base or large
 vit: 'large'
