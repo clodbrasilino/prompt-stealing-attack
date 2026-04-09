@@ -87,7 +87,6 @@ class SubjectGenerator:
             vit_grad_ckpt=config['vit_grad_ckpt'],
             vit_ckpt_layer=config['vit_ckpt_layer'],
             prompt=config['prompt'],
-            med_config=config['med_config']
         )
         
         # Load checkpoint
