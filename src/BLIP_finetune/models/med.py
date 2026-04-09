@@ -47,12 +47,22 @@ except ImportError:
     from transformers.generation_mixin import GenerationMixin
 
 # transformers 5.x removed these from public API — define locally
-def apply_chunking_to_forward(forward_fn, chunk_param, num_chunks, chunk_size):
-    """Helper to chunk a forward pass into smaller pieces."""
-    return torch.cat(
-        [forward_fn(*input) for input in zip(*chunk_param)],
-        dim=-1,
-    )
+def apply_chunking_to_forward(forward_fn, chunk_size, chunk_dim, input_tensor):
+    """
+    Helper to chunk a forward pass into smaller pieces.
+    Corrected to match HuggingFace transformers signature:
+    - forward_fn: the feed-forward function to apply to each chunk
+    - chunk_size: size of each chunk (int)
+    - chunk_dim: dimension along which to chunk (int)
+    - input_tensor: the tensor to chunk [B, S, D]
+    """
+    if chunk_size > 0:
+        tensor_shape = input_tensor.shape[chunk_dim]
+        num_chunks = tensor_shape // chunk_size
+        tensor_chunks = torch.split(input_tensor, chunk_size, dim=chunk_dim)
+        return torch.cat([forward_fn(t) for t in tensor_chunks], dim=chunk_dim)
+    else:
+        return forward_fn(input_tensor)
 
 
 def find_pruneable_heads_and_indices(heads, prune_heads, head_size, already_pruned_heads):
