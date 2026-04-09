@@ -643,6 +643,14 @@ class BertModel(BertPreTrainedModel):
         # transformers 5.x removed all_tied_weights_keys; BERT encoder has no weight tying
         pass
 
+    def get_head_mask(
+        self, head_mask=None, num_hidden_layers=None, output_attentions=None
+    ):
+        # transformers 5.x removed get_head_mask from PreTrainedModel
+        if head_mask is not None:
+            return head_mask
+        return [None] * (num_hidden_layers if num_hidden_layers is not None else self.config.num_hidden_layers)
+
     def get_input_embeddings(self):
         return self.embeddings.word_embeddings
 
