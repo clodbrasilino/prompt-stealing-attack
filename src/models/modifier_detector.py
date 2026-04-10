@@ -129,7 +129,11 @@ class ModifierDetector:
                 pred_keywords = []
                 
             pred_batch.append(pred_keywords)
-            
+
+        # For the single-image case return the inner List[str] directly so that
+        # callers can do `', '.join(modifiers)` without an extra [0] indexing.
+        if len(pred_batch) == 1:
+            return pred_batch[0]
         return pred_batch
     
     def set_threshold(self, threshold):
