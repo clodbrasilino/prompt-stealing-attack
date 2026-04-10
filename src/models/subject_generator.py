@@ -149,13 +149,21 @@ class SubjectGenerator:
                 min_length=5
             )
         
-        # Return a single string for batch=1 (most common case in the notebook).
-        # The underlying model.generate() returns List[List[str]]; flatten to List[str].
-        if isinstance(generated_subjects, list) and len(generated_subjects) == 1:
-            if isinstance(generated_subjects[0], list):
-                return generated_subjects[0][0]
-            return generated_subjects[0]
-        return generated_subjects
+        # model.generate() may return List[str] or List[List[str]] depending on the
+        # BLIP version. Always normalise to List[str] so callers can safely do
+        # str(subject) or use it in an f-string / ', '.join().
+        flat: list = []
+        for item in generated_subjects:
+            if isinstance(item, list):
+                # inner list — take the first (best-beam) caption
+                flat.append(item[0] if item else "")
+            else:
+                flat.append(str(item))
+
+        # For the single-image case return a plain string (backward compat)
+        if len(flat) == 1:
+            return flat[0]
+        return flat
     
     def eval(self):
         """Set model to eval mode"""
