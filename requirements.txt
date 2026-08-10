@@ -7,8 +7,8 @@ scikit-learn
 fairscale
 imagehash
 ipyplot
-numpy==1.22.3
-pandas==1.3.5
+numpy>=1.24
+pandas>=2.0
 scikit-image
 
 # Install CLIP: https://github.com/openai/CLIP/blob/dcba3cb2e2827b402d2701e7e1c7d9fed8a20ef1/README.md?plain=1#L20
@@ -26,4 +26,4 @@ opencv-python-headless
 opencv-contrib-python-headless
 ruamel.yaml>=0.17.32  # API fixed in src/models/subject_generator.py
 datasets
-pillow==10.4.0
+pillow>=10.0
