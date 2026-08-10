@@ -11,11 +11,12 @@ numpy>=1.24
 pandas>=2.0
 scikit-image
 
-# Install CLIP: https://github.com/openai/CLIP/blob/dcba3cb2e2827b402d2701e7e1c7d9fed8a20ef1/README.md?plain=1#L20
+# Install CLIP (originally: git+https://github.com/openai/CLIP.git)
+# Routed through ghproxy for servers behind the GFW
 ftfy
 regex
 tqdm
-git+https://github.com/openai/CLIP.git
+git+https://ghproxy.com/https://github.com/openai/CLIP.git
 
 # For finetune BLIP
 timm==0.4.12
