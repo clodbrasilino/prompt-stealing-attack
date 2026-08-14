@@ -1,5 +1,6 @@
 # My
 data/lexica_dataset/
+output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
