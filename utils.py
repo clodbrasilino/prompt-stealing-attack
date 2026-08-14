@@ -8,6 +8,43 @@ from PIL import Image
 from skimage import data, img_as_float
 from skimage.metrics import mean_squared_error
 
+
+def auto_select_gpu():
+    """Set CUDA_VISIBLE_DEVICES to the first free GPU (matches img2text-attacks convention).
+
+    Must run BEFORE any torch.cuda / clip.load call. Skips GPU 0 if it is busy
+    (e.g. VGD/P2HP running), preventing OOM conflicts.
+    """
+    try:
+        out = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=index,memory.used,memory.total",
+             "--format=csv,noheader,nounits"],
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+        if not out:
+            return
+        gpus = []
+        for line in out.splitlines():
+            parts = [p.strip() for p in line.split(",")]
+            gpus.append((int(parts[0]), int(parts[2]) - int(parts[1])))  # (index, free_mem)
+        if not gpus:
+            return
+        # prefer first GPU with > 5 GB free; otherwise the one with most free memory
+        free = [(i, m) for i, m in gpus if m > 5 * 1024]
+        if free:
+            free.sort(key=lambda x: x[1], reverse=True)
+            best = free[0][0]
+        else:
+            best = max(gpus, key=lambda x: x[1])[0]
+        os.environ.setdefault("CUDA_VISIBLE_DEVICES", str(best))
+        print(f"[auto_select_gpu] Using GPU {best} (free mem = "
+              f"{gpus[best][1] // 1024} GB)")
+    except Exception:
+        pass
+
+
+auto_select_gpu()
+
 def setup():
     install_cmds = [
         ['pip', 'install', 'ftfy', 'regex', 'tqdm', 'transformers==4.21.2', 'timm', 'fairscale', 'requests'],
