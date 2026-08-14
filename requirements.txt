@@ -1,6 +1,7 @@
 torch
 torchvision
-inplace-abn
+# inplace-abn replaced by pure-PyTorch compat module (inplace_abn.py)
+# Eliminates CUDA extension build (GCC 13 + CUDA 13 header incompatibility)
 pycocotools
 randaugment
 scikit-learn
