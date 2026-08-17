@@ -44,7 +44,7 @@ class PromptStealer():
             config = YAML(typ='safe').load(f)
         self.subject_generator = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
                             vit_grad_ckpt=config['vit_grad_ckpt'], vit_ckpt_layer=config['vit_ckpt_layer'], 
-                            prompt=config['prompt'], med_config=config['med_config'])
+                            prompt=config['prompt'], med_config=config.get('med_config'))
         print("Resume from checkpoint:", path)
         ckpt = torch.load(path, map_location='cpu')
         self.subject_generator.load_state_dict(ckpt['model'])
