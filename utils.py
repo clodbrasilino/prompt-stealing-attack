@@ -6,10 +6,10 @@ import sys
 
 # Vendored CLIP at src/clip (packaging-based, patched) must shadow the stale
 # pip openai-clip package (pkg_resources-based, broken on modern setuptools).
-# Insert BEFORE `import clip` below so it wins over site-packages.
+# Insert src/ BEFORE `import clip` below so `import clip` resolves to the
+# package at src/clip/ (relative imports inside the package need a parent).
 _REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_REPO_ROOT, 'src', 'clip'))
-sys.path.insert(0, os.path.join(_REPO_ROOT, 'src', 'blip'))
+sys.path.insert(0, os.path.join(_REPO_ROOT, 'src'))
 
 import clip
 from PIL import Image

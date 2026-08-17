@@ -19,6 +19,7 @@ setuptools
 ftfy
 regex
 tqdm
+packaging
 
 # For finetune BLIP
 timm==0.4.12
