@@ -62,9 +62,9 @@ class PromptStealer():
         self.modifier_detector = create_model(args).to(self.device)
         ckpt = torch.load(path, map_location='cpu')
         if 'model' in ckpt:
-            self.modifier_detector.load_state_dict(ckpt['model'], strict=True)
+            self.modifier_detector.load_state_dict(ckpt['model'], strict=False)
         else:
-            self.modifier_detector.load_state_dict(ckpt, strict=True)
+            self.modifier_detector.load_state_dict(ckpt, strict=False)
         print(f'Resume from checkpoint: {path}')
 
         self.modifier_detector_transform = transforms.Compose([
