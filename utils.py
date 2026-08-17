@@ -3,6 +3,14 @@ import torch
 import os
 import subprocess
 import sys
+
+# Vendored CLIP at src/clip (packaging-based, patched) must shadow the stale
+# pip openai-clip package (pkg_resources-based, broken on modern setuptools).
+# Insert BEFORE `import clip` below so it wins over site-packages.
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_REPO_ROOT, 'src', 'clip'))
+sys.path.insert(0, os.path.join(_REPO_ROOT, 'src', 'blip'))
+
 import clip
 from PIL import Image
 from skimage import data, img_as_float
@@ -55,19 +63,9 @@ def setup():
     for cmd in install_cmds:
         print(subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8'))
 
-# CLIP and BLIP come from requirements.txt (openai-clip + BLIP_finetune in src/).
-# setup() pip-installs from github.com, which is unreachable from the China server —
-# only run it as a last resort if neither the pip package nor the vendored src/clip
-# checkout can satisfy `import clip` (already done at the top of this file).
-if not os.path.exists('src/clip'):
-    try:
-        import clip  # noqa: F401  # already imported above via openai-clip
-    except ImportError:
-        setup()
-
-sys.path.append('src/blip')
-sys.path.append('src/clip')
-
+# CLIP is vendored at src/clip (patched for the modern packaging API) and put on
+# sys.path at the top of this file, so it shadows any stale pip openai-clip.
+# setup() below only exists as a last-resort fallback on non-server machines.
 device = "cuda" if torch.cuda.device_count() >= 1 else "cpu"
 print("Loading CLIP model...")
 clip_model_name = 'ViT-L/14'

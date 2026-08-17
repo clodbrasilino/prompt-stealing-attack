@@ -11,11 +11,14 @@ ipyplot
 numpy>=1.24
 pandas>=2.0
 scikit-image
-
 setuptools
 
-# Install CLIP via PyPI (git+https://github.com/openai/CLIP.git also works outside GFW)
-openai-clip
+# CLIP is vendored at src/clip/ (patched to use the modern `packaging` API).
+# The stale PyPI openai-clip (pkg_resources-based) is NOT used and must not be
+# installed. These are the vendored CLIP's runtime deps:
+ftfy
+regex
+tqdm
 
 # For finetune BLIP
 timm==0.4.12
