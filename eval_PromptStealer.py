@@ -1,15 +1,23 @@
 import os
+import sys
 from tqdm import tqdm
 tqdm.pandas()
 import argparse
 import time
 import pandas as pd
-import ruamel.yaml as yaml
+from ruamel.yaml import YAML
 import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.functional import InterpolationMode
 
 print("Current working directory:", os.getcwd())
+
+# Make src/ importable as a top-level package: blip.py internally does
+# `from BLIP_finetune.models.vit import ...`, which requires src/ on sys.path
+# even if BLIP_finetune was never pip-installed into the venv.
+SRC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
+if SRC_DIR not in sys.path:
+    sys.path.append(SRC_DIR)
 
 from data.lexica_dataset import LexicaDataset
 from src.BLIP_finetune.models.blip import blip_decoder
@@ -32,7 +40,8 @@ class PromptStealer():
     def load_subject_generator(self, path):
         print("Loading subject generator...")
         subject_generator_config_path = './src/BLIP_finetune/configs/lexica_subject.yaml'
-        config = yaml.load(open(subject_generator_config_path, 'r'), Loader=yaml.Loader)
+        with open(subject_generator_config_path, 'r') as f:
+            config = YAML(typ='safe').load(f)
         self.subject_generator = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
                             vit_grad_ckpt=config['vit_grad_ckpt'], vit_ckpt_layer=config['vit_ckpt_layer'], 
                             prompt=config['prompt'], med_config=config['med_config'])

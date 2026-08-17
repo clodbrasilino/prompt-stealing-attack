@@ -6,7 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "prompt-stealing-attack"
 version = "0.1.0"
 requires-python = ">=3.8"
-dependencies = ["ruamel.yaml", "fairscale", "inplace-abn"]
+# inplace-abn replaced by the pure-PyTorch compat module inplace_abn.py
+# (GCC 13 + CUDA 13 header conflict; PyPI metadata is also broken).
+dependencies = ["ruamel.yaml", "fairscale"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

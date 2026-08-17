@@ -1,7 +1,10 @@
 image_root: 'vera365/lexica_dataset'
 
 # set pretrained as a file path or an url
-pretrained: 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large_caption.pth'
+# Left empty on purpose: the Google-storage URL is unreachable from the China server,
+# and eval_PromptStealer.py loads the full fine-tuned weights from
+# output/PS_ckpt/subject_generator.pth right after construction.
+pretrained: ''
 
 # size of vit model; base or large
 vit: 'large'

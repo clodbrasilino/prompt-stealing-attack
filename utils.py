@@ -29,8 +29,9 @@ def auto_select_gpu():
             gpus.append((int(parts[0]), int(parts[2]) - int(parts[1])))  # (index, free_mem)
         if not gpus:
             return
-        # prefer first GPU with > 5 GB free; otherwise the one with most free memory
-        free = [(i, m) for i, m in gpus if m > 5 * 1024]
+        # PromptStealer stacks ViT-L BLIP (384px) + tresnet_l (448px) + CLIP ViT-L —
+        # needs well over 5 GB, so require > 12 GB free to avoid OOM on busy GPUs.
+        free = [(i, m) for i, m in gpus if m > 12 * 1024]
         if free:
             free.sort(key=lambda x: x[1], reverse=True)
             best = free[0][0]
@@ -53,8 +54,16 @@ def setup():
     ]
     for cmd in install_cmds:
         print(subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode('utf-8'))
+
+# CLIP and BLIP come from requirements.txt (openai-clip + BLIP_finetune in src/).
+# setup() pip-installs from github.com, which is unreachable from the China server —
+# only run it as a last resort if neither the pip package nor the vendored src/clip
+# checkout can satisfy `import clip` (already done at the top of this file).
 if not os.path.exists('src/clip'):
-    setup()
+    try:
+        import clip  # noqa: F401  # already imported above via openai-clip
+    except ImportError:
+        setup()
 
 sys.path.append('src/blip')
 sys.path.append('src/clip')
