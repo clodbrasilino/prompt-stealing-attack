@@ -12,6 +12,8 @@ numpy>=1.24
 pandas>=2.0
 scikit-image
 
+setuptools
+
 # Install CLIP via PyPI (git+https://github.com/openai/CLIP.git also works outside GFW)
 openai-clip
 
