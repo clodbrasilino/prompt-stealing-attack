@@ -47,9 +47,9 @@ class ModifierDetector:
         # Load checkpoint
         ckpt = torch.load(checkpoint_path, map_location='cpu')
         if 'model' in ckpt:
-            self.model.load_state_dict(ckpt['model'], strict=True)
+            self.model.load_state_dict(ckpt['model'], strict=False)
         else:
-            self.model.load_state_dict(ckpt, strict=True)
+            self.model.load_state_dict(ckpt, strict=False)
         print(f'✅ Resume from checkpoint: {checkpoint_path}')
         
         # Define transform
